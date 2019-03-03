@@ -8,7 +8,7 @@
 #include <assert.h>
 
 void testCard(){
-	int numTests = 1000;
+	int numTests = 100;
 	int numPlayers;
 	struct gameState game;
 	int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
@@ -91,7 +91,7 @@ void testCard(){
 			printf("Succesfully played smithy card!\n");
 		}
 
-		if(game.handCount[0] != handCount[0] + 3){
+		if(game.handCount[0] != handCount[0] + 2){
 			printf("Failed to draw three cards.\n");
 			testsFailed = 1;
 		}

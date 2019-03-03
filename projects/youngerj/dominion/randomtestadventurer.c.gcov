@@ -1,0 +1,164 @@
+        -:    0:Source:randomtestadventurer.c
+        -:    0:Graph:randomtestadventurer.gcno
+        -:    0:Data:randomtestadventurer.gcda
+        -:    0:Runs:2
+        -:    0:Programs:1
+        -:    1:#include "dominion.h"
+        -:    2:#include "dominion_helpers.h"
+        -:    3:#include "rngs.h"
+        -:    4:#include <stdlib.h>
+        -:    5:#include <stdio.h>
+        -:    6:#include <string.h>
+        -:    7:#include <time.h>
+        -:    8:#include <assert.h>
+        -:    9:
+        2:   10:void testCard(){
+        2:   11:	int numTests = 1000;
+        -:   12:	int numPlayers;
+        -:   13:	struct gameState game;
+        2:   14:	int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
+        2:   15:	int testsFailed = 0;
+        -:   16:
+        -:   17:
+        2:   18:	printf("Adventure Card Test Start\n");
+        -:   19:
+        2:   20:	srand(time(NULL));
+        -:   21:
+     2002:   22:	for(int i = 0; i < numTests; i++){
+     2000:   23:		printf("Test #%d:\n",i+1);
+        -:   24:
+        -:   25:		// Set up test game
+     2000:   26:		numPlayers = rand() % 3 + 2;
+     2000:   27:		memset(&game,23,sizeof(struct gameState));
+     2000:   28:		initializeGame(numPlayers,k,1,&game);
+        -:   29:	
+     7895:   30:		for(int j = 0; j < numPlayers;j++){
+        -:   31:
+        -:   32:			// Set up random numbers of cards
+     5895:   33:			game.deckCount[j] = rand() % 21 + 5;
+     5895:   34:			game.handCount[j] = rand() % 8 + 3;
+     5895:   35:			game.discardCount[j] = rand() % 8 + 2;
+        -:   36:		
+        -:   37:			// Randomize deck
+    93861:   38:			for(int l = 0; l < game.deckCount[j];l++){
+    87966:   39:				if(rand() % 3 == 0){
+    29131:   40:					game.deck[j][l] = rand() % 3 + 1;
+        -:   41:				}
+        -:   42:				else{
+    58835:   43:					game.deck[j][l] = k[rand() % 10];
+        -:   44:				}
+        -:   45:			}
+        -:   46:
+        -:   47:
+        -:   48:			// Randomize Hand
+    44398:   49:			for(int l = 0; l < game.handCount[j];l++){
+    38503:   50:				if(rand() % 3 == 0){
+    12838:   51:					game.hand[j][l] = rand() % 3 + 1;
+        -:   52:				}
+        -:   53:				else{
+    25665:   54:					game.hand[j][l] = k[rand() % 10];
+        -:   55:				}
+        -:   56:			}
+        -:   57:
+        -:   58:			// Randomize discard
+    38484:   59:			for(int l = 0; l < game.discardCount[j]; l++){
+    32589:   60:				if(rand() % 3 == 0){
+    10994:   61:					game.discard[j][l] = rand() % 3 + 1;
+        -:   62:				}
+        -:   63:				else{
+    21595:   64:					game.discard[j][l] = k[rand() % 10];
+        -:   65:				}
+        -:   66:			}
+        -:   67:		}
+        -:   68:
+        -:   69:		// Put an adventurer in a players hand
+     2000:   70:		game.whoseTurn = 0;
+     2000:   71:		int adventurerCardPos = rand() % (game.handCount[0]);
+     2000:   72:		game.hand[0][adventurerCardPos] = adventurer;
+        -:   73:
+        -:   74:		// Store counts before playing the card, for testing purposes	
+        -:   75:		int deckCount[4];
+        -:   76:		int handCount[4];
+        -:   77:		int discardCount[4];
+     7895:   78:	       	for(int a = 0; a < numPlayers;a++){
+     5895:   79:			deckCount[a] = game.deckCount[a];
+     5895:   80:			handCount[a] = game.handCount[a];
+     5895:   81:			discardCount[a] = game.discardCount[a];
+        -:   82:		}	
+        -:   83:
+     2000:   84:		int playCard = cardEffect(adventurer, 0, 0, 0, &game, 1, 0);
+        -:   85:
+     2000:   86:		if(playCard){
+    #####:   87:			printf("Failed to play adventurer card!\n");
+    #####:   88:			testsFailed = 1;
+        -:   89:		}
+        -:   90:		else{
+     2000:   91:			printf("Succesfully played adventurer card!\n");
+        -:   92:		}
+        -:   93:
+     2000:   94:		if(((deckCount[0] - 2) + discardCount[0]) != game.discardCount[0] + game.deckCount[0]){
+     2000:   95:			printf("Failed to draw two treasure cards and discard the rest \n");
+     2000:   96:			testsFailed = 1;
+        -:   97:		}
+        -:   98:		else{
+    #####:   99:			printf("Succesfully drew two treasure cards and discarde the rest. \n");
+        -:  100:		}
+        -:  101:
+     2000:  102:		if(game.handCount[0] != handCount[0] + 2){
+     2000:  103:			printf("Failed to draw two cards.\n");
+     2000:  104:			testsFailed = 1;
+        -:  105:		}
+        -:  106:		else{
+    #####:  107:			printf("Succesfully drew two cards. \n");
+        -:  108:		}
+        -:  109:
+     2000:  110:		if(game.discardCount[0] <= discardCount[0] + 1){
+    #####:  111:			printf("Failed to discard. \n");
+    #####:  112:			testsFailed = 1;
+        -:  113:		}
+        -:  114:		else{
+     2000:  115:			printf("Succesfully discarded. \n");
+        -:  116:		}
+        -:  117:
+     5895:  118:		for(int j = 1; j < numPlayers; j++){
+        -:  119:		
+     3895:  120:			if(game.deckCount[j] != deckCount[j]){
+    #####:  121:				printf("ERROR: Player %d's deck was changed and it shouldn't have been!\n",j+1);
+    #####:  122:				testsFailed = 1;
+        -:  123:			}
+        -:  124:			else{
+     3895:  125:				printf("Player %d's deck was unchanged.\n",j);
+        -:  126:			}
+        -:  127:
+     3895:  128:			if(game.handCount[j] != handCount[j]){
+    #####:  129:				printf("ERROR: Player %d's, hand was changed and it shouldn't have been!\n",j);
+    #####:  130:				testsFailed = 1;
+        -:  131:			}
+        -:  132:			else{
+     3895:  133:				printf("Player %d's hand was unchanged.\n",j);
+        -:  134:			}
+        -:  135:
+     3895:  136:			if(game.discardCount[j] != discardCount[j]){
+    #####:  137:				printf("ERROR: Player %d's hand was changed and it shouldn't have been! \n",j);
+    #####:  138:				testsFailed = 1;
+        -:  139:			}
+        -:  140:			else{
+     3895:  141:				printf("Player %d's hand was unchanged.\n",j);
+        -:  142:			}
+        -:  143:		}
+        -:  144:	}	
+        -:  145:
+        2:  146:	if(testsFailed == 0){
+    #####:  147:		printf("All tests passed!\n");
+        -:  148:	}
+        -:  149:	else{
+        2:  150:		printf("Some tests failed..\n");
+        -:  151:	}
+        -:  152:
+        2:  153:}
+        -:  154:
+        2:  155:int main(){
+        2:  156:	testCard();
+        -:  157:
+        2:  158:	return 0;
+        -:  159:}

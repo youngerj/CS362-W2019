@@ -1,0 +1,148 @@
+        -:    0:Source:randomtestcard1.c
+        -:    0:Graph:randomtestcard1.gcno
+        -:    0:Data:randomtestcard1.gcda
+        -:    0:Runs:2
+        -:    0:Programs:1
+        -:    1:#include "dominion.h"
+        -:    2:#include "dominion_helpers.h"
+        -:    3:#include "rngs.h"
+        -:    4:#include <stdlib.h>
+        -:    5:#include <stdio.h>
+        -:    6:#include <string.h>
+        -:    7:#include <time.h>
+        -:    8:#include <assert.h>
+        -:    9:
+        2:   10:void testCard(){
+        2:   11:	int numTests = 100;
+        -:   12:	int numPlayers;
+        -:   13:	struct gameState game;
+        2:   14:	int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
+        2:   15:	int testsFailed = 0;
+        -:   16:
+        -:   17:
+        2:   18:	printf("Smithy Card Test Start\n");
+        -:   19:
+        2:   20:	srand(time(NULL));
+        -:   21:
+      202:   22:	for(int i = 0; i < numTests; i++){
+      200:   23:		printf("Test #%d:\n",i+1);
+        -:   24:
+        -:   25:		// Set up test game
+      200:   26:		numPlayers = rand() % 3 + 2;
+      200:   27:		memset(&game,23,sizeof(struct gameState));
+      200:   28:		initializeGame(numPlayers,k,1,&game);
+        -:   29:	
+      791:   30:		for(int j = 0; j < numPlayers;j++){
+        -:   31:
+        -:   32:			// Set up random numbers of cards
+      591:   33:			game.deckCount[j] = rand() % 21 + 5;
+      591:   34:			game.handCount[j] = rand() % 8 + 3;
+      591:   35:			game.discardCount[j] = rand() % 8 + 2;
+        -:   36:		
+        -:   37:			// Randomize deck
+     9486:   38:			for(int l = 0; l < game.deckCount[j];l++){
+     8895:   39:				if(rand() % 3 == 0){
+     2996:   40:					game.deck[j][l] = rand() % 3 + 1;
+        -:   41:				}
+        -:   42:				else{
+     5899:   43:					game.deck[j][l] = k[rand() % 10];
+        -:   44:				}
+        -:   45:			}
+        -:   46:
+        -:   47:
+        -:   48:			// Randomize Hand
+     4498:   49:			for(int l = 0; l < game.handCount[j];l++){
+     3907:   50:				if(rand() % 3 == 0){
+     1263:   51:					game.hand[j][l] = rand() % 3 + 1;
+        -:   52:				}
+        -:   53:				else{
+     2644:   54:					game.hand[j][l] = k[rand() % 10];
+        -:   55:				}
+        -:   56:			}
+        -:   57:
+        -:   58:			// Randomize discard
+     3987:   59:			for(int l = 0; l < game.discardCount[j]; l++){
+     3396:   60:				if(rand() % 3 == 0){
+     1140:   61:					game.discard[j][l] = rand() % 3 + 1;
+        -:   62:				}
+        -:   63:				else{
+     2256:   64:					game.discard[j][l] = k[rand() % 10];
+        -:   65:				}
+        -:   66:			}
+        -:   67:		}
+        -:   68:
+        -:   69:		// Put a smithy in a players hand
+      200:   70:		game.whoseTurn = 0;
+      200:   71:		int smithyCardPos = rand() % (game.handCount[0]);
+      200:   72:		game.hand[0][smithyCardPos] = smithy;
+        -:   73:
+        -:   74:		// Store counts before playing the card, for testing purposes	
+        -:   75:		int deckCount[4];
+        -:   76:		int handCount[4];
+        -:   77:		int discardCount[4];
+      791:   78:	       	for(int a = 0; a < numPlayers;a++){
+      591:   79:			deckCount[a] = game.deckCount[a];
+      591:   80:			handCount[a] = game.handCount[a];
+      591:   81:			discardCount[a] = game.discardCount[a];
+        -:   82:		}	
+        -:   83:
+      200:   84:		int playCard = cardEffect(smithy, 0, 0, 0, &game, 1, 0);
+        -:   85:
+      200:   86:		if(playCard){
+    #####:   87:			printf("Failed to play smithy card!\n");
+    #####:   88:			testsFailed = 1;
+        -:   89:		}
+        -:   90:		else{
+      200:   91:			printf("Succesfully played smithy card!\n");
+        -:   92:		}
+        -:   93:
+      200:   94:		if(game.handCount[0] != handCount[0] + 2){
+    #####:   95:			printf("Failed to draw three cards.\n");
+    #####:   96:			testsFailed = 1;
+        -:   97:		}
+        -:   98:		else{
+      200:   99:			printf("Succesfully drew three cards. \n");
+        -:  100:		}
+        -:  101:
+      591:  102:		for(int j = 1; j < numPlayers; j++){
+        -:  103:		
+      391:  104:			if(game.deckCount[j] != deckCount[j]){
+    #####:  105:				printf("ERROR: Player %d's deck was changed and it shouldn't have been!\n",j+1);
+    #####:  106:				testsFailed = 1;
+        -:  107:			}
+        -:  108:			else{
+      391:  109:				printf("Player %d's deck was unchanged.\n",j);
+        -:  110:			}
+        -:  111:
+      391:  112:			if(game.handCount[j] != handCount[j]){
+    #####:  113:				printf("ERROR: Player %d's, hand was changed and it shouldn't have been!\n",j);
+    #####:  114:				testsFailed = 1;
+        -:  115:			}
+        -:  116:			else{
+      391:  117:				printf("Player %d's hand was unchanged.\n",j);
+        -:  118:			}
+        -:  119:
+      391:  120:			if(game.discardCount[j] != discardCount[j]){
+    #####:  121:				printf("ERROR: Player %d's hand was changed and it shouldn't have been! \n",j);
+    #####:  122:				testsFailed = 1;
+        -:  123:			}
+        -:  124:			else{
+      391:  125:				printf("Player %d's hand was unchanged.\n",j);
+        -:  126:			}
+        -:  127:		}
+        -:  128:	}	
+        -:  129:
+        2:  130:	if(testsFailed == 0){
+        2:  131:		printf("All tests passed!\n");
+        -:  132:	}
+        -:  133:	else{
+    #####:  134:		printf("Some tests failed..\n");
+        -:  135:	}
+        -:  136:
+        2:  137:}
+        -:  138:
+        2:  139:int main(){
+        2:  140:	testCard();
+        -:  141:
+        2:  142:	return 0;
+        -:  143:}

@@ -8,7 +8,7 @@
 #include <assert.h>
 
 void testCard(){
-	int numTests = 1000;
+	int numTests = 100;
 	int numPlayers;
 	struct gameState game;
 	int k[10] = {adventurer, council_room, feast, gardens, mine, remodel, smithy, village, baron, great_hall};
@@ -32,7 +32,7 @@ void testCard(){
 			// Set up random numbers of cards
 			game.deckCount[j] = rand() % 21 + 5;
 			game.handCount[j] = rand() % 8 + 3;
-			game.discardCount[j] = rand() % 8 + 22
+			game.discardCount[j] = rand() % 8 + 2;
 		
 			// Randomize deck
 			for(int l = 0; l < game.deckCount[j];l++){
